@@ -1,12 +1,16 @@
 # Transform-C-to-Flowchart
 
+**注意：程序正在开发中，还不能用**
+
+目前进度：能够去除注释
+
 冰岩2020秋招实习任务之一：C语言转换为流程图工具。
 
 请将代码放入code.c中，运行begin.exe（编译main.cpp得到），得到的Flowchart.png即为结果。
 
 尽量给出正常的代码。程序将只有很弱的识别语法错误的功能。
 
-请将宏定义放在程序的最前面。目前的版本不支持带参的宏定义。
+请将宏定义放在程序的最前面。
 
 绘图工具：[https://graphviz.org/](https://graphviz.org/)
 
