@@ -50,6 +50,7 @@ void getsent()
 
 void getpara()
 {
+	str.clear();
 	while(ch!=EOF&&ch!=')')
 	{
 		str.push_back(ch);
@@ -59,6 +60,7 @@ void getpara()
 
 void getpara_noand()
 {
+	str.clear();
 	while(ch!=EOF&&ch!=')')
 	{
 		if(ch!='&')str.push_back(ch);
@@ -92,9 +94,10 @@ int handlesent(int lastnum)
 		int now;
 		do ch=getchar();while(ch!='"');
 		do ch=getchar();while(ch!='"');
-		getchara();getchara();str.clear();
+		getchara();getchara();
 		getpara_noand();
-		printf("a%d[label=\"Input\n%s\" shape=\"box\"]\n",now=apply_num(),str.c_str());
+		getchara();
+		printf("a%d[label=\"Input %s\" shape=\"parallelogram\"]\n",now=apply_num(),str.c_str());
 		printf("a%d->a%d\n",lastnum,now);
 		return now;
 	}
@@ -103,9 +106,10 @@ int handlesent(int lastnum)
 		int now;
 		do ch=getchar();while(ch!='"');
 		do ch=getchar();while(ch!='"');
-		getchara();getchara();str.clear();
-		getpara_noand();
-		printf("a%d[label=\"Print\n%s\" shape=\"box\"]\n",now=apply_num(),str.c_str());
+		getchara();getchara();
+		getpara();
+		getchara();
+		printf("a%d[label=\"Print %s\" shape=\"parallelogram\"]\n",now=apply_num(),str.c_str());
 		printf("a%d->a%d\n",lastnum,now);
 		return now;
 	}
@@ -121,7 +125,13 @@ int handlesent(int lastnum)
 
 int handlefunc(int lastnum)
 {
-	int now=lastnum;
+	int now=lastnum;/*iskuai=0;
+	while(!(ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z'))
+	{
+		ch=getchar();
+		if(ch=='{')iskuai=1;
+	}*/
+	getchara();
 	if(ch!='{')
 		now=handlesent(now);
 	else
@@ -194,7 +204,7 @@ int main()
 	int now;
 	printf("digraph main{\na%d[label=\"Begin\" shape=\"oval\"]\n",now=apply_num());
 
-	while(ch!='{')getchara();
+	while(ch!=')')getchara();
 	int lastnum=handlefunc(now);
 	printf("a%d[label=\"End\" shape=\"oval\"]\n",now=apply_num());
 	printf("a%d->a%d\n}",lastnum,now);
@@ -202,8 +212,8 @@ int main()
 	freopen("CON","r",stdin);
 	freopen("CON","w",stdout);
 	system(".\\Graphviz_2.44.1\\bin\\dot -Tpng temp_1.dot -o Flowchart.png");
-	//system("del code_temp.c");
-	//system("del temp_1.dot");
+	system("del code_temp.c");
+	system("del temp_1.dot");
 	puts("Finished.");
 	system("pause");
 	return 0;
