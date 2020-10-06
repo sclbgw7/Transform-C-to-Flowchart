@@ -7,7 +7,7 @@
 using namespace std;
 
 //reserved words
-string rword[19]=
+string rword[20]=
 {"","short","int","float","double","char",//0-5
 "if","else","while","for","return",//6-10
 "break","continue","define","include","getchar",//11-15
@@ -17,6 +17,9 @@ map<string,int>vars,defs;//int determines type(1-5)
 //static var
 char ch;string str;
 
+/*
+getchara();if(not '{')getword();if(not rwords)getsent();
+*/
 void getchara()
 {
 	ch=getchar();
@@ -27,8 +30,18 @@ void getchara()
 void getword()
 {
 	str.clear();
+	str.push_back(ch);
 	getchara();
 	while(ch!=EOF&&((ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')))
+	{
+		str.push_back(ch);
+		ch=getchar();
+	}
+}
+
+void getsent()
+{
+	while(ch!=EOF&&ch!='\n'&&ch!=';'&&ch!=')')
 	{
 		str.push_back(ch);
 		ch=getchar();
@@ -41,10 +54,37 @@ int apply_num()
 	return ++num;
 }
 
+int handlesent(int lastnum);
 int handlefunc(int lastnum);
 int handleif(int lastnum);
 int handlewhile(int lastnum);
 int handlefor(int lastnum);
+
+int handlesent(int lastnum)
+{
+	getword();
+
+	getsent();
+	printf("a%d[label=\"End\" shape=\"oval\"]\n",nownum=apply_num());
+}
+
+int handlefunc(int lastnum)
+{
+	int now=lastnum;
+	getchara();
+	if(ch!='{')
+		now=handlesent(now);
+	else
+	{
+		getchara()
+		while(ch!='}')
+		{
+			now=handlesent(now);
+			getchara();
+		}
+	}
+	return now;
+}
 
 int main()
 {
