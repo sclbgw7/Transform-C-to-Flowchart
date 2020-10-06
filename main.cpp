@@ -41,9 +41,27 @@ void getword()
 
 void getsent()
 {
-	while(ch!=EOF&&ch!='\n'&&ch!=';'&&ch!=')')
+	while(ch!=EOF&&ch!='\n'&&ch!=';')
 	{
 		str.push_back(ch);
+		ch=getchar();
+	}
+}
+
+void getpara()
+{
+	while(ch!=EOF&&ch!=')')
+	{
+		str.push_back(ch);
+		ch=getchar();
+	}
+}
+
+void getpara_noand()
+{
+	while(ch!=EOF&&ch!=')')
+	{
+		if(ch!='&')str.push_back(ch);
 		ch=getchar();
 	}
 }
@@ -63,20 +81,52 @@ int handlefor(int lastnum);
 int handlesent(int lastnum)
 {
 	getword();
-
-	getsent();
-	printf("a%d[label=\"End\" shape=\"oval\"]\n",nownum=apply_num());
+	/*if(str==rword[6])
+		return handleif(lastnum);
+	else if(str==rword[8])
+		return handlewhile(lastnum);
+	else if(str==rword[9])
+		return handlefor(lastnum);
+	else*/if(str==rword[16])
+	{
+		int now;
+		do ch=getchar();while(ch!='"');
+		do ch=getchar();while(ch!='"');
+		getchara();getchara();str.clear();
+		getpara_noand();
+		printf("a%d[label=\"Input\n%s\" shape=\"box\"]\n",now=apply_num(),str.c_str());
+		printf("a%d->a%d\n",lastnum,now);
+		return now;
+	}
+	else if(str==rword[17])
+	{
+		int now;
+		do ch=getchar();while(ch!='"');
+		do ch=getchar();while(ch!='"');
+		getchara();getchara();str.clear();
+		getpara_noand();
+		printf("a%d[label=\"Print\n%s\" shape=\"box\"]\n",now=apply_num(),str.c_str());
+		printf("a%d->a%d\n",lastnum,now);
+		return now;
+	}
+	else
+	{
+		int now;
+		getsent();
+		printf("a%d[label=\"%s\" shape=\"box\"]\n",now=apply_num(),str.c_str());
+		printf("a%d->a%d\n",lastnum,now);
+		return now;
+	}
 }
 
 int handlefunc(int lastnum)
 {
 	int now=lastnum;
-	getchara();
 	if(ch!='{')
 		now=handlesent(now);
 	else
 	{
-		getchara()
+		getchara();
 		while(ch!='}')
 		{
 			now=handlesent(now);
@@ -97,9 +147,11 @@ int main()
 	{
 		if(ch=='"')
 		{
-			putchar(ch);
-			do ch=getchar(),putchar(ch);
-			while(ch!='"'&&ch!=EOF);
+			putchar('\\'),putchar(ch);
+			ch=getchar();
+			while(ch!='"'&&ch!=EOF)
+				putchar(ch),ch=getchar();
+			if(ch=='"')putchar('\\'),putchar(ch);
 		}
 		else if(ch=='/')
 		{
@@ -139,19 +191,19 @@ int main()
 	freopen("code_temp.c","r",stdin);
 	freopen("temp_1.dot","w",stdout);
 
-	int nownum;
-	printf("digraph main{\na%d[label=\"Begin\" shape=\"oval\"]\n",nownum=apply_num());
+	int now;
+	printf("digraph main{\na%d[label=\"Begin\" shape=\"oval\"]\n",now=apply_num());
 
-
-	int lastnum=/*handlefunc()*/nownum;
-	printf("a%d[label=\"End\" shape=\"oval\"]\n",nownum=apply_num());
-	printf("a%d->a%d\n}",lastnum,nownum);
+	while(ch!='{')getchara();
+	int lastnum=handlefunc(now);
+	printf("a%d[label=\"End\" shape=\"oval\"]\n",now=apply_num());
+	printf("a%d->a%d\n}",lastnum,now);
 
 	freopen("CON","r",stdin);
 	freopen("CON","w",stdout);
 	system(".\\Graphviz_2.44.1\\bin\\dot -Tpng temp_1.dot -o Flowchart.png");
-	system("del code_temp.c");
-	system("del temp_1.dot");
+	//system("del code_temp.c");
+	//system("del temp_1.dot");
 	puts("Finished.");
 	system("pause");
 	return 0;
