@@ -15,7 +15,7 @@ string rword[20]=
 
 map<string,int>vars,defs;//int determines type(1-5)
 //static var
-char ch;string str;
+char ch;string str,yorn;
 
 /*
 getchara();if(not '{')getword();if(not rwords)getsent();
@@ -74,6 +74,12 @@ int apply_num()
 	return ++num;
 }
 
+int link(int a,int b)
+{
+	printf("a%d->a%d[label=\"%s\"]\n",a,b,yorn.c_str());;
+	yorn.clear();
+}
+
 int handlesent(int lastnum);
 int handlefunc(int lastnum);
 int handleif(int lastnum);
@@ -98,7 +104,7 @@ int handlesent(int lastnum)
 		getpara_noand();
 		getchara();
 		printf("a%d[label=\"Input %s\" shape=\"parallelogram\"]\n",now=apply_num(),str.c_str());
-		printf("a%d->a%d\n",lastnum,now);
+		link(lastnum,now);
 		return now;
 	}
 	else if(str==rword[17])
@@ -110,7 +116,7 @@ int handlesent(int lastnum)
 		getpara();
 		getchara();
 		printf("a%d[label=\"Print %s\" shape=\"parallelogram\"]\n",now=apply_num(),str.c_str());
-		printf("a%d->a%d\n",lastnum,now);
+		link(lastnum,now);
 		return now;
 	}
 	else
