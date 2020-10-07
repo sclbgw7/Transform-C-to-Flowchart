@@ -85,17 +85,23 @@ int handlefunc(int lastnum);
 int handleif(int lastnum);
 int handlewhile(int lastnum);
 int handlefor(int lastnum);
+int handleelse(int lastnum);
+void endif();
 
+int isif;
 int handlesent(int lastnum)
 {
 	getword();
-	/*if(str==rword[6])
+	if(str==rword[6])
 		return handleif(lastnum);
-	else if(str==rword[8])
+	else if(str==rword[7])
+		return handleelse(lastnum);
+	else if(isif)endif();
+	/*if(str==rword[8])
 		return handlewhile(lastnum);
 	else if(str==rword[9])
-		return handlefor(lastnum);
-	else*/if(str==rword[16])
+		return handlefor(lastnum);*/
+	if(str==rword[16])
 	{
 		int now;
 		do ch=getchar();while(ch!='"');
@@ -124,19 +130,14 @@ int handlesent(int lastnum)
 		int now;
 		getsent();
 		printf("a%d[label=\"%s\" shape=\"box\"]\n",now=apply_num(),str.c_str());
-		printf("a%d->a%d\n",lastnum,now);
+		link(lastnum,now);
 		return now;
 	}
 }
 
 int handlefunc(int lastnum)
 {
-	int now=lastnum;/*iskuai=0;
-	while(!(ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z'))
-	{
-		ch=getchar();
-		if(ch=='{')iskuai=1;
-	}*/
+	int now=lastnum;
 	getchara();
 	if(ch!='{')
 		now=handlesent(now);
@@ -150,6 +151,40 @@ int handlefunc(int lastnum)
 		}
 	}
 	return now;
+}
+
+int lastif,lastend;
+int handleif(int lastnum)
+{
+	int now=apply_num();
+	getchara();
+	getpara();
+	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
+	link(lastnum,now);
+	yorn="Y";
+	lastif=now;
+	now=handlefunc(now);
+	lastend=apply_num();
+	printf("a%d[label=\"End If\" shape=\"box\"]\n",lastend);
+	link(now,lastend);
+	isif=1;
+	return lastend;
+}
+
+int handleelse(int lastnum)
+{
+	isif=0;
+	yorn="N";
+	int now=handlefunc(lastif);
+	link(now,lastend);
+	return lastend;
+}
+
+void endif()
+{
+	isif=0;
+	yorn="N";
+	link(lastif,lastend);
 }
 
 int main()
@@ -213,13 +248,13 @@ int main()
 	while(ch!=')')getchara();
 	int lastnum=handlefunc(now);
 	printf("a%d[label=\"End\" shape=\"oval\"]\n",now=apply_num());
-	printf("a%d->a%d\n}",lastnum,now);
+	link(lastnum,now);puts("}");
 
 	freopen("CON","r",stdin);
 	freopen("CON","w",stdout);
 	system(".\\Graphviz_2.44.1\\bin\\dot -Tpng temp_1.dot -o Flowchart.png");
-	system("del code_temp.c");
-	system("del temp_1.dot");
+	//system("del code_temp.c");
+	//system("del temp_1.dot");
 	puts("Finished.");
 	system("pause");
 	return 0;
