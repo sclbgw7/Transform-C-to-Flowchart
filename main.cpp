@@ -88,7 +88,7 @@ int handlefor(int lastnum);
 int handleelse(int lastnum);
 void endif();
 
-int isif;
+int isif=0;
 int handlesent(int lastnum)
 {
 	getword();
@@ -97,9 +97,9 @@ int handlesent(int lastnum)
 	else if(str==rword[7])
 		return handleelse(lastnum);
 	else if(isif)endif();
-	/*if(str==rword[8])
+	if(str==rword[8])
 		return handlewhile(lastnum);
-	else if(str==rword[9])
+	/*else if(str==rword[9])
 		return handlefor(lastnum);*/
 	if(str==rword[16])
 	{
@@ -167,13 +167,13 @@ int handleif(int lastnum)
 	lastend=apply_num();
 	printf("a%d[label=\"End If\" shape=\"box\"]\n",lastend);
 	link(now,lastend);
-	isif=1;
+	isif++;
 	return lastend;
 }
 
 int handleelse(int lastnum)
 {
-	isif=0;
+	isif--;
 	yorn="N";
 	int now=handlefunc(lastif);
 	link(now,lastend);
@@ -182,9 +182,24 @@ int handleelse(int lastnum)
 
 void endif()
 {
-	isif=0;
+	isif--;
 	yorn="N";
 	link(lastif,lastend);
+}
+
+int handlewhile(int lastnum)
+{
+	int now=apply_num();
+	getchara();
+	getpara();
+	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
+	link(lastnum,now);
+	yorn="Y";
+	int lastwhile=now;
+	now=handlefunc(now);
+	link(now,lastwhile);
+	yorn="N";
+	return lastwhile;
 }
 
 int main()
@@ -253,8 +268,8 @@ int main()
 	freopen("CON","r",stdin);
 	freopen("CON","w",stdout);
 	system(".\\Graphviz_2.44.1\\bin\\dot -Tpng temp_1.dot -o Flowchart.png");
-	//system("del code_temp.c");
-	//system("del temp_1.dot");
+	system("del code_temp.c");
+	system("del temp_1.dot");
 	puts("Finished.");
 	system("pause");
 	return 0;
