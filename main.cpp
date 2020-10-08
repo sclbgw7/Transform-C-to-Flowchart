@@ -50,7 +50,7 @@ void getpara()
 {
 	str.clear();
 	if(ch=='(')getchara();
-	while(ch!=EOF&&ch!=')')
+	while(ch!=EOF&&ch!=')'&&ch!=';')
 	{
 		str.push_back(ch);
 		ch=getchar();
@@ -111,8 +111,8 @@ int handlesent(int lastnum)
 	else if(isif)endif();
 	if(str==rword[8])
 		return handlewhile(lastnum);
-	/*else if(str==rword[9])
-		return handlefor(lastnum);*/
+	else if(str==rword[9])
+		return handlefor(lastnum);
 	if(str==rword[16])
 	{
 		int now;
@@ -216,6 +216,54 @@ int handlewhile(int lastnum)
 	yorn="Y";
 	now=handlefunc(now);
 	link(now,lastwhile);
+	puts("}");
+	yorn="N";
+	return para;
+}
+
+int handlefor(int lastnum)
+{
+	int now=apply_num(),isdec=0;
+	if(ch=='(')getchara();
+	getword();
+	for(int i=1;i<=5;i++)
+	{
+		if(str==rword[i])
+		{
+			str.clear();
+			getchara();
+			getsent();
+			printf("a%d[label=\"Declaration\\n%s:%s\" shape=\"box\"]\n",now,str.c_str(),rword[i].c_str());
+			link(lastnum,now);
+			isdec=1;
+			break;
+		}
+	}
+	if(!isdec)
+	{
+		getsent();
+		printf("a%d[label=\"%s\" shape=\"box\"]\n",now,str.c_str());
+		link(lastnum,now);
+	}
+	printf("subgraph cluster_while_%d{\nlabel=\"for\"\ncolor=blue\n",now);
+	str.clear();
+	getchara();getsent();
+	lastnum=now,now=apply_num();
+	printf("a%d[shape=\"point\"]\n",now);
+	int poi=now;
+	link(lastnum,now);
+	lastnum=now,now=apply_num();
+	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
+	int para=now;
+	link(lastnum,now);
+	lastnum=now,now=apply_num();
+	getchara();getpara();
+	printf("a%d[label=\"%s\" shape=\"box\"]\n",now,str.c_str());
+	int last=now;
+	link(last,poi);
+	yorn="Y";
+	now=handlefunc(para);
+	link(now,last);
 	puts("}");
 	yorn="N";
 	return para;
