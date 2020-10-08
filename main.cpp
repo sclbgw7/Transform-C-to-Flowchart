@@ -73,9 +73,10 @@ int apply_num()
 	return ++num;
 }
 
-int link(int a,int b)
+void link(int a,int b)
 {
-	printf("a%d->a%d[label=\"%s\"]\n",a,b,yorn.c_str());;
+	if(a==114514)return;
+	printf("a%d->a%d[label=\"%s\"]\n",a,b,yorn.c_str());
 	yorn.clear();
 }
 
@@ -85,9 +86,10 @@ int handleif(int lastnum);
 int handlewhile(int lastnum);
 int handlefor(int lastnum);
 int handleelse(int lastnum);
-void endif();
+int endif();
 
 int isif=0;
+stack<int>whead,wtail;
 int handlesent(int lastnum)
 {
 	getword();
@@ -108,12 +110,24 @@ int handlesent(int lastnum)
 		return handleif(lastnum);
 	else if(str==rword[7])
 		return handleelse(lastnum);
-	else if(isif)endif();
+	else if(isif)lastnum=endif();
 	if(str==rword[8])
 		return handlewhile(lastnum);
 	else if(str==rword[9])
 		return handlefor(lastnum);
-	if(str==rword[16])
+	else if(str==rword[11])//break
+	{
+		if(ch!=';')getchara();
+		link(lastnum,wtail.top());
+		return 114514;
+	}
+	else if(str==rword[12])//continue
+	{
+		if(ch!=';')getchara();
+		link(lastnum,whead.top());
+		return 114514;
+	}
+	else if(str==rword[16])
 	{
 		int now;
 		do getchara();while(ch!='"');
@@ -162,6 +176,7 @@ int handlefunc(int lastnum)
 			getchara();
 		}
 	}
+	if(isif)return endif();
 	return now;
 }
 
@@ -176,11 +191,17 @@ int handleif(int lastnum)
 	yorn="Y";
 	lastif.push(now);
 	now=handlefunc(now);
-	lastend.push(apply_num());
-	printf("a%d[shape=\"point\"]\n",lastend.top());
-	link(now,lastend.top());
+	if(now!=114514)
+	{
+		lastend.push(apply_num());
+		printf("a%d[shape=\"point\"]\n",lastend.top());
+		link(now,lastend.top());
+		isif=1;
+		return lastend.top();
+	}
 	isif=1;
-	return lastend.top();
+	lastend.push(114514);
+	return 114514;
 }
 
 int handleelse(int lastnum)
@@ -188,23 +209,33 @@ int handleelse(int lastnum)
 	isif=0;
 	yorn="N";
 	int now=handlefunc(lastif.top()),le=lastend.top();
-	link(now,le);
+	if(le!=114514)link(now,le);
 	lastif.pop();lastend.pop();
 	return le;
 }
 
-void endif()
+int endif()
 {
 	isif=0;
 	yorn="N";
-	link(lastif.top(),lastend.top());
+	int le=lastend.top();
+	if(le==114514)
+	{
+		le=apply_num();
+		printf("a%d[shape=\"point\"]\n",le);
+	}
+	link(lastif.top(),le);
 	lastif.pop();lastend.pop();
+	return le;
 }
 
 int handlewhile(int lastnum)
 {
-	int now=apply_num(),lastwhile=now;
+	int now=apply_num(),lastwhile=now,tail=apply_num();
 	printf("a%d[shape=\"point\"]\n",now);
+	printf("a%d[shape=\"point\"]\n",tail);
+	whead.push(now);
+	wtail.push(tail);
 	link(lastnum,now);
 	printf("subgraph cluster_while_%d{\nlabel=\"while\"\ncolor=green\n",now);
 	now=apply_num();
@@ -218,12 +249,15 @@ int handlewhile(int lastnum)
 	link(now,lastwhile);
 	puts("}");
 	yorn="N";
-	return para;
+	link(para,tail);
+	whead.pop();
+	wtail.pop();
+	return tail;
 }
 
 int handlefor(int lastnum)
 {
-	int now=apply_num(),isdec=0;
+	int now=apply_num(),isdec=0,tail=apply_num();
 	if(ch=='(')getchara();
 	getword();
 	for(int i=1;i<=5;i++)
@@ -250,6 +284,8 @@ int handlefor(int lastnum)
 	getchara();getsent();
 	lastnum=now,now=apply_num();
 	printf("a%d[shape=\"point\"]\n",now);
+	printf("a%d[shape=\"point\"]\n",tail);
+	wtail.push(tail);
 	int poi=now;
 	link(lastnum,now);
 	lastnum=now,now=apply_num();
@@ -261,12 +297,19 @@ int handlefor(int lastnum)
 	printf("a%d[label=\"%s\" shape=\"box\"]\n",now,str.c_str());
 	int last=now;
 	link(last,poi);
+	now=apply_num();
+	printf("a%d[shape=\"point\"]\n",now);
+	link(now,last);
+	whead.push(now);
 	yorn="Y";
 	now=handlefunc(para);
-	link(now,last);
+	link(now,whead.top());
 	puts("}");
 	yorn="N";
-	return para;
+	link(para,tail);
+	whead.pop();
+	wtail.pop();
+	return tail;
 }
 
 int main()
@@ -336,7 +379,7 @@ int main()
 	freopen("CON","w",stdout);
 	system(".\\Graphviz_2.44.1\\bin\\dot -Tpng temp_1.dot -o Flowchart.png");
 	system("del code_temp.c");
-	//system("del temp_1.dot");
+	system("del temp_1.dot");
 	puts("Finished.");
 	system("pause");
 	return 0;
