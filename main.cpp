@@ -18,9 +18,6 @@ map<string,int>vars,defs;//int determines type(1-5)
 //static var
 char ch;string str,yorn;
 
-/*
-getchara();if(not '{')getword();if(not rwords)getsent();
-*/
 void getchara()
 {
 	ch=getchar();
@@ -32,7 +29,7 @@ void getword()
 {
 	str.clear();
 	str.push_back(ch);
-	getchara();
+	ch=getchar();
 	while(ch!=EOF&&((ch>='A'&&ch<='Z')||(ch>='a'&&ch<='z')))
 	{
 		str.push_back(ch);
@@ -52,6 +49,7 @@ void getsent()
 void getpara()
 {
 	str.clear();
+	if(ch=='(')getchara();
 	while(ch!=EOF&&ch!=')')
 	{
 		str.push_back(ch);
@@ -93,6 +91,19 @@ int isif=0;
 int handlesent(int lastnum)
 {
 	getword();
+	for(int i=1;i<=5;i++)
+	{
+		if(str==rword[i])
+		{
+			str.clear();
+			getchara();
+			getsent();
+			int now=apply_num();
+			printf("a%d[label=\"Declaration\\n%s:%s\" shape=\"box\"]\n",now,str.c_str(),rword[i].c_str());
+			link(lastnum,now);
+			return now;
+		}
+	}
 	if(str==rword[6])
 		return handleif(lastnum);
 	else if(str==rword[7])
@@ -105,8 +116,8 @@ int handlesent(int lastnum)
 	if(str==rword[16])
 	{
 		int now;
-		do ch=getchar();while(ch!='"');
-		do ch=getchar();while(ch!='"');
+		do getchara();while(ch!='"');
+		do getchara();while(ch!='"');
 		getchara();getchara();
 		getpara_noand();
 		getchara();
@@ -117,8 +128,8 @@ int handlesent(int lastnum)
 	else if(str==rword[17])
 	{
 		int now;
-		do ch=getchar();while(ch!='"');
-		do ch=getchar();while(ch!='"');
+		do getchara();while(ch!='"');
+		do getchara();while(ch!='"');
 		getchara();getchara();
 		getpara();
 		getchara();
@@ -195,6 +206,7 @@ int handlewhile(int lastnum)
 	int now=apply_num(),lastwhile=now;
 	printf("a%d[shape=\"point\"]\n",now);
 	link(lastnum,now);
+	printf("subgraph cluster_while_%d{\nlabel=\"while\"\ncolor=green\n",now);
 	now=apply_num();
 	int para=now;
 	getchara();
@@ -204,6 +216,7 @@ int handlewhile(int lastnum)
 	yorn="Y";
 	now=handlefunc(now);
 	link(now,lastwhile);
+	puts("}");
 	yorn="N";
 	return para;
 }
@@ -275,7 +288,7 @@ int main()
 	freopen("CON","w",stdout);
 	system(".\\Graphviz_2.44.1\\bin\\dot -Tpng temp_1.dot -o Flowchart.png");
 	system("del code_temp.c");
-	system("del temp_1.dot");
+	//system("del temp_1.dot");
 	puts("Finished.");
 	system("pause");
 	return 0;
