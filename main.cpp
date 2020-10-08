@@ -3,6 +3,7 @@
 #include <cstring>
 #include <string>
 #include <map>
+#include <stack>
 
 using namespace std;
 
@@ -153,7 +154,7 @@ int handlefunc(int lastnum)
 	return now;
 }
 
-int lastif,lastend;
+stack<int> lastif,lastend;
 int handleif(int lastnum)
 {
 	int now=apply_num();
@@ -162,44 +163,49 @@ int handleif(int lastnum)
 	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
 	link(lastnum,now);
 	yorn="Y";
-	lastif=now;
+	lastif.push(now);
 	now=handlefunc(now);
-	lastend=apply_num();
-	printf("a%d[label=\"End If\" shape=\"box\"]\n",lastend);
-	link(now,lastend);
-	isif++;
-	return lastend;
+	lastend.push(apply_num());
+	printf("a%d[shape=\"point\"]\n",lastend.top());
+	link(now,lastend.top());
+	isif=1;
+	return lastend.top();
 }
 
 int handleelse(int lastnum)
 {
-	isif--;
+	isif=0;
 	yorn="N";
-	int now=handlefunc(lastif);
-	link(now,lastend);
-	return lastend;
+	int now=handlefunc(lastif.top()),le=lastend.top();
+	link(now,le);
+	lastif.pop();lastend.pop();
+	return le;
 }
 
 void endif()
 {
-	isif--;
+	isif=0;
 	yorn="N";
-	link(lastif,lastend);
+	link(lastif.top(),lastend.top());
+	lastif.pop();lastend.pop();
 }
 
 int handlewhile(int lastnum)
 {
-	int now=apply_num();
+	int now=apply_num(),lastwhile=now;
+	printf("a%d[shape=\"point\"]\n",now);
+	link(lastnum,now);
+	now=apply_num();
+	int para=now;
 	getchara();
 	getpara();
 	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
-	link(lastnum,now);
+	link(lastwhile,now);
 	yorn="Y";
-	int lastwhile=now;
 	now=handlefunc(now);
 	link(now,lastwhile);
 	yorn="N";
-	return lastwhile;
+	return para;
 }
 
 int main()
