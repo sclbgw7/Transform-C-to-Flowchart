@@ -1,17 +1,29 @@
 //Put your code here
-//sample
+//sample2
 #include <stdio.h>
 
 int main()
 {
-	int a,b,c;
-	scanf("%d%d",&a,&b,&c);
-	if(a>b)
-	  while(b>0)
-	  {
-		  b--;/*sui bian xie de*/
-		  c+=b;
-	  }
-	printf("%d\n",c);
+	int a,sum;sum=0;
+	scanf("%d",&a);
+	for(int i=1;i<=a;i++)
+	{
+		if(i>10086)
+		{
+			continue;
+		}
+		a+=sum;
+	}
+	while(sum>a)
+	{
+		if(a<0)break;
+		else
+		{
+			a++;
+			continue;
+		}
+		
+	}
+	printf("%d\n",sum);
 	return 0;
 }
