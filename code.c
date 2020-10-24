@@ -1,5 +1,5 @@
 //Put your code here
-//sample2
+//sample
 #include <stdio.h>
 
 int main()
@@ -8,13 +8,13 @@ int main()
 	scanf("%d",&a);
 	for(int i=1;i<=a;i++)
 	{
-		if(i>10086)
+		if((i>10086&&i<1)||a!=sum)
 		{
 			continue;
 		}
 		a+=sum;
 	}
-	while(sum>a)
+	while(sum>a&&(a<0||a>0))
 	{
 		if(a<0)break;
 		else
@@ -24,6 +24,6 @@ int main()
 		}
 		
 	}
-	printf("%d\n",sum);
+	printf("%d\n",(sum+1)/2);
 	return 0;
 }

@@ -49,21 +49,30 @@ void getsent()
 void getpara()
 {
 	str.clear();
-	if(ch=='(')getchara();
-	while(ch!=EOF&&ch!=')'&&ch!=';')
+	int flag=1;
+	if(ch=='(')++flag;
+	if(ch==')')--flag;
+	while(ch!=EOF&&flag&&ch!=';')
 	{
 		str.push_back(ch);
 		ch=getchar();
+		if(ch=='(')++flag;
+		if(ch==')')--flag;
 	}
 }
 
 void getpara_noand()
 {
 	str.clear();
-	while(ch!=EOF&&ch!=')')
+	int flag=1;
+	if(ch=='(')++flag;
+	if(ch==')')--flag;
+	while(ch!=EOF&&flag&&ch!=')')
 	{
 		if(ch!='&')str.push_back(ch);
 		ch=getchar();
+		if(ch=='(')++flag;
+		if(ch==')')--flag;
 	}
 }
 
@@ -184,6 +193,7 @@ stack<int> lastif,lastend;
 int handleif(int lastnum)
 {
 	int now=apply_num();
+	if(ch==' ')getchara();
 	getchara();
 	getpara();
 	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
@@ -240,6 +250,7 @@ int handlewhile(int lastnum)
 	printf("subgraph cluster_while_%d{\nlabel=\"while\"\ncolor=green\n",now);
 	now=apply_num();
 	int para=now;
+	if(ch==' ')getchara();
 	getchara();
 	getpara();
 	printf("a%d[label=\"%s ?\" shape=\"diamond\"]\n",now,str.c_str());
